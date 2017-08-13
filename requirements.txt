@@ -1,0 +1,4 @@
+pygame
+requests
+rx
+RPi.GPIO
