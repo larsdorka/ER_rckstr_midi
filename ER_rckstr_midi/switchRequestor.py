@@ -32,21 +32,21 @@ class SwitchRequestor:
     def switch_off(self, outlet, prepare=False):
         """"""
         if 1 <= outlet <= 4:
-            self.switch_states_new[outlet] = False
+            self.switch_states_new[outlet - 1] = False
             if not prepare:
                 self.send_switches()
 
     def switch_on(self, outlet, prepare=False):
         """"""
         if 1 <= outlet <= 4:
-            self.switch_states_new[outlet] = True
+            self.switch_states_new[outlet - 1] = True
             if not prepare:
                 self.send_switches()
 
     def switch_toggle(self, outlet, prepare=False):
         """"""
         if 1 <= outlet <= 4:
-            self.switch_states_new[outlet] = not self.switch_states_new[outlet]
+            self.switch_states_new[outlet - 1] = not self.switch_states_new[outlet]
             if not prepare:
                 self.send_switches()
 
