@@ -1,7 +1,6 @@
 import pygame
 import sys
 import time
-import os
 from pygame.locals import *
 
 import midiInput
@@ -103,7 +102,7 @@ if __name__ == '__main__':
     pygame.init()
     debug_log = dict()
     config = configuration.Configuration(debug_log)
-    config.load(os.path.normpath("data/config.json"))
+    config.load("config.json")
     display = displayRenderer.DisplayRenderer(debug_log)
     fullscreen = config.get_config('FULL_SCREEN')
     show_debug = config.get_config('SHOW_DEBUG')
@@ -117,6 +116,9 @@ if __name__ == '__main__':
     codeGen = codeGenerator.CodeGenerator()
     dio = inputReader.InputReader(debug_log)
     dio.setup_pins(player_switch=29)
+
+    # state variables
+    success = False
     number = 0
     note_name = ""
     color = None
@@ -166,12 +168,19 @@ if __name__ == '__main__':
             display.render_state()
 
         # midi data handling
-        if midi.connected:
-            midi.read_data()
-        number = codeGen.calc_number(midi.midi_data)
-        note_name = codeGen.calc_note_name(midi.get_flat_midi_data(), config.get_config('CHORD'))
-        color = codeGen.calc_color(midi.midi_data)
-        # display.render_number(number, color)
-        display.render_note_name(note_name, color)
-        display.render_note_image(note_name, color)
-        display.update()
+        if not (not dio.state_player_switch and success):
+            if midi.connected:
+                midi.read_data()
+            number = codeGen.calc_number(midi.midi_data)
+            note_name = codeGen.calc_note_name(midi.get_flat_midi_data(), config.get_config('CHORD'))
+            if note_name == "CORRECT":
+                success = True
+                number = config.get_config('LOCK_CODE')
+            else:
+                success = False
+                number = 0
+            color = codeGen.calc_color(midi.midi_data)
+            display.render_number(number, color)
+            display.render_note_name(note_name, color)
+            display.render_note_image(note_name, color)
+            display.update()
