@@ -105,9 +105,9 @@ if __name__ == '__main__':
     config = configuration.Configuration(debug_log)
     config.load(os.path.normpath("data/config.json"))
     display = displayRenderer.DisplayRenderer(debug_log)
-    # fullscreen = configuration.get_config('FULL_SCREEN')
-    # show_debug = configuration.get_config('SHOW_DEBUG')
-    # chord = config.get_config('CHORD')
+    fullscreen = config.get_config('FULL_SCREEN')
+    show_debug = config.get_config('SHOW_DEBUG')
+    chord = config.get_config('CHORD')
     show_menu = False
     menu_select = 0
     menu_page = format_main_menu(config)
@@ -115,6 +115,8 @@ if __name__ == '__main__':
     midi = midiInput.MidiInput(debug_log)
     midi.open(config.get_config('MIDI_DEVICE_ID'))
     codeGen = codeGenerator.CodeGenerator()
+    dio = inputReader.InputReader(debug_log)
+    dio.setup_pins(player_switch=29)
     number = 0
     note_name = ""
     color = None
@@ -169,7 +171,7 @@ if __name__ == '__main__':
         number = codeGen.calc_number(midi.midi_data)
         note_name = codeGen.calc_note_name(midi.get_flat_midi_data(), config.get_config('CHORD'))
         color = codeGen.calc_color(midi.midi_data)
-        display.render_number(number, color)
+        # display.render_number(number, color)
         display.render_note_name(note_name, color)
         display.render_note_image(note_name, color)
         display.update()
