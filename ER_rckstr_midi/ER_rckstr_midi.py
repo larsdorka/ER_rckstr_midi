@@ -116,7 +116,9 @@ if __name__ == '__main__':
     codeGen = codeGenerator.CodeGenerator()
     dio = inputReader.InputReader(debug_log)
     dio.setup_pins(player_switch=29)
-
+    outlets = switchRequestor.SwitchRequestor(debug_log)
+    outlets.open(url=config.get_config('OUTLET_URL'), password=config.get_config('OUTLET_PW'))
+    outlets.login()
     # state variables
     success = False
     number = 0
@@ -152,6 +154,7 @@ if __name__ == '__main__':
                 elif input_value == "S":
                     config.save()
                 elif input_value == "X":
+                    outlets.logout()
                     terminate()
             elif menu_select == 1:
                 if input_value == "menu":
@@ -171,14 +174,15 @@ if __name__ == '__main__':
         if not (not dio.state_player_switch and success):
             if midi.connected:
                 midi.read_data()
-            number = codeGen.calc_number(midi.midi_data)
             note_name = codeGen.calc_note_name(midi.get_flat_midi_data(), config.get_config('CHORD'))
             if note_name == "CORRECT":
                 success = True
                 number = config.get_config('LOCK_CODE')
+                outlets.switch_on(1)
             else:
                 success = False
                 number = 0
+                outlets.switch_off(1)
             color = codeGen.calc_color(midi.midi_data)
             display.render_number(number, color)
             display.render_note_name(note_name, color)
