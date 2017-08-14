@@ -1,4 +1,5 @@
 import json
+import os
 
 # configuration parameters in config.json
 # FULL_SCREEN = false   # set to false to display in 1024/768 window
@@ -9,6 +10,7 @@ import json
 STD_CONFIG_DATA = {'FULL_SCREEN': False,
                    'MIDI_DEVICE_ID': -1,
                    'SHOW_DEBUG': True,
+                   'LOCK_CODE': 1337,
                    'CHORD': [1, 4, 9]}
 
 
@@ -25,11 +27,11 @@ class Configuration:
         self.config_data = None
         self.config_file_path = ""
 
-    def load(self, config_file_path="config.json"):
+    def load(self, config_file="config.json"):
         """loads the configuration file and decodes the json content
-        :param config_file_path:
+        :param config_file: the name of the configuration file in the standard config folder
         """
-        self.config_file_path = config_file_path
+        self.config_file_path = os.path.normpath("config/" + config_file)
         self.config_data = {}
         file_data = {}
         try:
@@ -73,6 +75,11 @@ class Configuration:
         """encodes the json content and saves the configuration file"""
         if self.config_file_path != "":
             json_config = json.dumps(self.config_data, indent=2)
+            if not os.path.exists("config"):
+                try:
+                    os.makedirs("config")
+                except Exception as ex:
+                    self.debug_log['config'] = "error on creating config folder: " + str(ex)
             with open(self.config_file_path, 'w', encoding='utf-8') as file:
                 try:
                     file.write(json_config)
