@@ -1,7 +1,7 @@
 import platform
 
 if platform.system() == "Windows":
-    import gpioMockup as GPIO
+    from modules import gpioMockup as GPIO
 else:
     import RPi.GPIO as GPIO
 

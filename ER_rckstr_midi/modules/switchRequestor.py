@@ -53,8 +53,10 @@ class SwitchRequestor:
     def send_switches(self):
         """"""
         data = dict()
+        changes_detected = False
         for index in range(4):
             if self.switch_states_new[index] != self.switch_states[index]:
+                changes_detected = True
                 if self.switch_states_new[index]:
                     data['cte' + str(index + 1)] = "1"
                 else:
@@ -62,11 +64,13 @@ class SwitchRequestor:
                 self.switch_states[index] = self.switch_states_new[index]
             else:
                 data['cte' + str(index + 1)] = ""
-        self.debug_log['requestor_data'] = str(data)
-
-        try:
-            response = self.session.post(self.url, data=data)
-            self.debug_log['requestor_response'] = str(response)
-            self.debug_log['requestor_error'] = ""
-        except Exception as ex:
-            self.debug_log['requestor_error'] = str(ex)
+        if changes_detected:
+            self.debug_log['requestor_data'] = str(data)
+            try:
+                response = self.session.post(self.url, data=data)
+                self.debug_log['requestor_response'] = str(response)
+                self.debug_log['requestor_error'] = ""
+            except Exception as ex:
+                self.debug_log['requestor_error'] = str(ex)
+        else:
+            self.debug_log['requestor_data'] = 'no changes detected'

@@ -1,14 +1,10 @@
-import pygame
 import sys
 import time
+
+import pygame
 from pygame.locals import *
 
-import midiInput
-import codeGenerator
-import displayRenderer
-import configuration
-import inputReader
-import switchRequestor
+from modules import *
 
 MENU_STRUCTURE = [
     ["main menu",
@@ -175,12 +171,11 @@ if __name__ == '__main__':
             if midi.connected:
                 midi.read_data()
             note_name = codeGen.calc_note_name(midi.get_flat_midi_data(), config.get_config('CHORD'))
+            success = codeGen.verify_chord(midi.get_flat_midi_data(), config.get_config('CHORD'))
             if note_name == "CORRECT":
-                success = True
                 number = config.get_config('LOCK_CODE')
                 outlets.switch_on(1)
             else:
-                success = False
                 number = 0
                 outlets.switch_off(1)
             color = codeGen.calc_color(midi.midi_data)
