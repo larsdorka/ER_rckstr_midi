@@ -8,6 +8,7 @@ class SwitchRequestor:
         """"""
         self.debug_log = debug_log
         self.debug_log['requestor_data'] = ""
+        self.debug_log['requestor_request'] = ""
         self.debug_log['requestor_response'] = ""
         self.debug_log['requestor_error'] = ""
         self.url = ""
@@ -23,11 +24,23 @@ class SwitchRequestor:
 
     def login(self):
         """"""
-        response = self.session.post(self.url + "/login.html", data={'pw': self.password})
+        try:
+            response = self.session.post(self.url + "/login.html", data={'pw': self.password})
+            self.debug_log['requestor_request'] = "send switches"
+            self.debug_log['requestor_response'] = str(response)
+            self.debug_log['requestor_error'] = ""
+        except Exception as ex:
+            self.debug_log['requestor_error'] = str(ex)
 
     def logout(self):
         """"""
-        response = self.session.get(self.url + "/login.html")
+        try:
+            response = self.session.get(self.url + "/login.html")
+            self.debug_log['requestor_request'] = "send switches"
+            self.debug_log['requestor_response'] = str(response)
+            self.debug_log['requestor_error'] = ""
+        except Exception as ex:
+            self.debug_log['requestor_error'] = str(ex)
 
     def switch_off(self, outlet, prepare=False):
         """"""
@@ -68,6 +81,7 @@ class SwitchRequestor:
             self.debug_log['requestor_data'] = str(data)
             try:
                 response = self.session.post(self.url, data=data)
+                self.debug_log['requestor_request'] = "send switches"
                 self.debug_log['requestor_response'] = str(response)
                 self.debug_log['requestor_error'] = ""
             except Exception as ex:
