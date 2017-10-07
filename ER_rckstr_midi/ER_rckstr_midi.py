@@ -13,6 +13,9 @@ MENU_STRUCTURE = [
      "2 - display fullscreen: {}",
      "3 - show debug info: {}",
      "S - save configuration",
+     "",
+     "P - small group: {}",
+     "R - reset game state",
      "X - exit application",
      "",
      "space - close menu"],
@@ -44,6 +47,10 @@ def check_for_input():
             result = "X"
         elif event.key == K_s:
             result = "S"
+        elif event.key == K_r:
+            result = "R"
+        elif event.key == K_p:
+            result = "P"
         elif event.key == K_1:
             result = "1"
         elif event.key == K_2:
@@ -74,8 +81,11 @@ def format_main_menu(config):
     menu.append(MENU_STRUCTURE[0][4].format(str(config.get_config('SHOW_DEBUG'))))
     menu.append(MENU_STRUCTURE[0][5])
     menu.append(MENU_STRUCTURE[0][6])
-    menu.append(MENU_STRUCTURE[0][7])
+    menu.append(MENU_STRUCTURE[0][7].format(str(config.get_config('SMALL_GROUP'))))
     menu.append(MENU_STRUCTURE[0][8])
+    menu.append(MENU_STRUCTURE[0][9])
+    menu.append(MENU_STRUCTURE[0][10])
+    menu.append(MENU_STRUCTURE[0][11])
     return menu
 
 
@@ -116,6 +126,8 @@ if __name__ == '__main__':
     outlets.open(url=config.get_config('OUTLET_URL'), password=config.get_config('OUTLET_PW'))
     outlets.login()
     # state variables
+    login_timer = time.time()
+    send_timer = time.time()
     success = False
     number = 0
     note_name = ""
@@ -147,6 +159,11 @@ if __name__ == '__main__':
                 elif input_value == "3":
                     config.set_config('SHOW_DEBUG', not config.get_config('SHOW_DEBUG'))
                     menu_page = format_main_menu(config)
+                elif input_value == "P":
+                    config.set_config('SMALL_GROUP', not config.get_config('SMALL_GROUP'))
+                    menu_page = format_main_menu(config)
+                elif input_value == "R":
+                    success = False
                 elif input_value == "S":
                     config.save()
                 elif input_value == "X":
@@ -166,20 +183,35 @@ if __name__ == '__main__':
             debug_log['midi_connected'] = str(midi.connected)
             display.render_state()
 
+        if time.time() - login_timer > 60:
+            login_timer = time.time()
+            outlets.login()
+
         # midi data handling
-        if not (not dio.state_player_switch and success):
+        # if not (not dio.state_player_switch and success):
+        if not (config.get_config('SMALL_GROUP') and success):
             if midi.connected:
                 midi.read_data()
             note_name = codeGen.calc_note_name(midi.get_flat_midi_data(), config.get_config('CHORD'))
             success = codeGen.verify_chord(midi.get_flat_midi_data(), config.get_config('CHORD'))
             if note_name == "CORRECT":
                 number = config.get_config('LOCK_CODE')
-                outlets.switch_on(1)
+                outlets.switch_on(1, prepare=True)
             else:
                 number = 0
-                outlets.switch_off(1)
-            color = codeGen.calc_color(midi.midi_data)
+                outlets.switch_off(1, prepare=True)
+            # color = codeGen.calc_color(midi.midi_data)
+            color = 255, 255, 255
             display.render_number(number, color)
             display.render_note_name(note_name, color)
             display.render_note_image(note_name, color)
-            display.update()
+        else:
+            display.render_number(number, color)
+            display.render_note_name(note_name, color)
+
+        # render display and send outlets
+        display.update()
+        if outlets.prepared:
+            if time.time() - send_timer > 1:
+                send_timer = time.time()
+                outlets.send_switches()

@@ -16,6 +16,7 @@ class SwitchRequestor:
         self.session = requests.session()
         self.switch_states = [False] * 4
         self.switch_states_new = [False] * 4
+        self.prepared = False
 
     def open(self, url, password):
         """"""
@@ -26,7 +27,7 @@ class SwitchRequestor:
         """"""
         try:
             response = self.session.post(self.url + "/login.html", data={'pw': self.password})
-            self.debug_log['requestor_request'] = "send switches"
+            self.debug_log['requestor_request'] = "login"
             self.debug_log['requestor_response'] = str(response)
             self.debug_log['requestor_error'] = ""
         except Exception as ex:
@@ -36,7 +37,7 @@ class SwitchRequestor:
         """"""
         try:
             response = self.session.get(self.url + "/login.html")
-            self.debug_log['requestor_request'] = "send switches"
+            self.debug_log['requestor_request'] = "logout"
             self.debug_log['requestor_response'] = str(response)
             self.debug_log['requestor_error'] = ""
         except Exception as ex:
@@ -48,6 +49,8 @@ class SwitchRequestor:
             self.switch_states_new[outlet - 1] = False
             if not prepare:
                 self.send_switches()
+            else:
+                self.prepared = True
 
     def switch_on(self, outlet, prepare=False):
         """"""
@@ -55,6 +58,8 @@ class SwitchRequestor:
             self.switch_states_new[outlet - 1] = True
             if not prepare:
                 self.send_switches()
+            else:
+                self.prepared = True
 
     def switch_toggle(self, outlet, prepare=False):
         """"""
@@ -62,6 +67,8 @@ class SwitchRequestor:
             self.switch_states_new[outlet - 1] = not self.switch_states_new[outlet]
             if not prepare:
                 self.send_switches()
+            else:
+                self.prepared = True
 
     def send_switches(self):
         """"""
@@ -78,6 +85,7 @@ class SwitchRequestor:
             else:
                 data['cte' + str(index + 1)] = ""
         if changes_detected:
+            self.prepared = False
             self.debug_log['requestor_data'] = str(data)
             try:
                 response = self.session.post(self.url, data=data)
@@ -87,4 +95,5 @@ class SwitchRequestor:
             except Exception as ex:
                 self.debug_log['requestor_error'] = str(ex)
         else:
-            self.debug_log['requestor_data'] = 'no changes detected'
+            # self.debug_log['requestor_data'] = 'no changes detected'
+            pass

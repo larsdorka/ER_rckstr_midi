@@ -10,6 +10,7 @@ import os
 STD_CONFIG_DATA = {'FULL_SCREEN': False,
                    'MIDI_DEVICE_ID': -1,
                    'SHOW_DEBUG': True,
+                   'SMALL_GROUP': True,
                    'LOCK_CODE': 1337,
                    'CHORD': [1, 4, 9],
                    'OUTLET_URL': "http://127.0.0.1",

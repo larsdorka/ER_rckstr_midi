@@ -1,5 +1,6 @@
 import pygame
 import os
+import time
 
 
 class DisplayRenderer:
@@ -64,6 +65,26 @@ class DisplayRenderer:
         display_rect = display_text.get_rect()
         display_rect = display_rect.move(0, 55)
         self.display_buffer.blit(display_text, display_rect)
+        display_text = self.small_font.render('timestamp: ' + str(time.time()), True, (255, 255, 255), (0, 0, 0))
+        display_rect = display_text.get_rect()
+        display_rect = display_rect.move(0, 66)
+        self.display_buffer.blit(display_text, display_rect)
+        display_text = self.small_font.render(self.debug_log['requestor_request'], True, (255, 255, 255), (0, 0, 0))
+        display_rect = display_text.get_rect()
+        display_rect = display_rect.move(0, 77)
+        self.display_buffer.blit(display_text, display_rect)
+        display_text = self.small_font.render(self.debug_log['requestor_data'], True, (255, 255, 255), (0, 0, 0))
+        display_rect = display_text.get_rect()
+        display_rect = display_rect.move(0, 88)
+        self.display_buffer.blit(display_text, display_rect)
+        display_text = self.small_font.render(self.debug_log['requestor_response'], True, (255, 255, 255), (0, 0, 0))
+        display_rect = display_text.get_rect()
+        display_rect = display_rect.move(0, 99)
+        self.display_buffer.blit(display_text, display_rect)
+        display_text = self.small_font.render(self.debug_log['requestor_error'], True, (255, 255, 255), (0, 0, 0))
+        display_rect = display_text.get_rect()
+        display_rect = display_rect.move(0, 110)
+        self.display_buffer.blit(display_text, display_rect)
 
     def render_menu(self, menu_page=list()):
         """renders a single menu screen
@@ -81,7 +102,7 @@ class DisplayRenderer:
         :param color: the color to render the number with
         """
         if number != 0 or self.render_zero is True:
-            display_text = self.big_font.render(str(number).zfill(5), True, color, (0, 0, 0))
+            display_text = self.big_font.render(str(number).zfill(4), True, color, (0, 0, 0))
             display_rect = display_text.get_rect()
             display_rect.center = (self.display_width // 2, self.display_height // 2)
             self.display_buffer.blit(display_text, display_rect)
